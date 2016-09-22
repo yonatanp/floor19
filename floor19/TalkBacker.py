@@ -13,10 +13,11 @@ nltk.download('punkt')
 
 class TalkBacker(object):
 
-    def __init__(self, given_article=None):
+    def __init__(self, given_article=None, header_text=None):
         if given_article is None:
             given_article = GIVEN_ARTICLE
         self.given_article = given_article
+        self.header_text = header_text
 
     def suggest(self):
         optional_talkbacks = self.getAllOptinalTalkBacks()
@@ -35,11 +36,11 @@ class TalkBacker(object):
 
         return best_talkback, best_talkback_score
 
-    def getArticleTopWords(self, text):
-        # TODO: in the meanwhile - all article
-        return text
+    def getArticleTopWords(self, header_text):
+        return header_text[0]
 
     def getAllOptinalTalkBacks(self):
+        #getArticleTopWords
         return OPTIONAL_TALKBACKS
 
 if __name__ == "__main__":

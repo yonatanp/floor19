@@ -24,8 +24,8 @@ for file in files:
         processed_list = TextProcessing(line_dict['title_text']).cleanTextHebrew(exclude_punct=False)
         data.append(processed_list)
 
-word2idf = json.loads(open('../data/ynet_national_500_articles_idf_vals.txt', 'rb').read())
-vocabulary = word2idf.keys() #len=31113
+word2idf = json.loads(open('../data/ynet_all_types_500_articles_tf_idf.txt', 'rb').read())
+vocabulary = word2idf.keys() #len=105178
 
 file = open('talkbacks_training_set.txt', 'wb')
 for d_list in data:
