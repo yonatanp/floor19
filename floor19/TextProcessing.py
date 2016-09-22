@@ -12,8 +12,11 @@ class TextProcessing(object):
         self.text = text
         self.st = LancasterStemmer()
 
-    def getFreqDict(self):
-        cleaned_words_list = self.cleanTextEnglish(self.text)
+    def getFreqDict(self, hebrew=True):
+        if hebrew:
+            cleaned_words_list = self.cleanTextHebrew(self.text)
+        else:
+            cleaned_words_list = self.cleanTextEnglish(self.text)
         print "cleaned_words_list", cleaned_words_list
         sum_words = len(cleaned_words_list)
         freq_dict = dict((word, count/float(sum_words)) for word, count in Counter(cleaned_words_list).iteritems())
