@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -72,6 +73,7 @@ flags.DEFINE_string(
 flags.DEFINE_string("data_path", None, "data_path")
 flags.DEFINE_bool("use_fp16", False,
                   "Train using 16-bit floats instead of 32bit floats")
+flags.DEFINE_string("save_path", None, "Path for saving the trained parameters")
 
 FLAGS = flags.FLAGS
 
@@ -117,16 +119,17 @@ class PTBModel(object):
         #
         # The alternative version of the code below is:
         #
-        # inputs = [tf.squeeze(input_, [1])
-        #           for input_ in tf.split(1, num_steps, inputs)]
-        # outputs, state = tf.nn.rnn(cell, inputs, initial_state=self._initial_state)
-        outputs = []
-        state = self._initial_state
-        with tf.variable_scope("RNN"):
-            for time_step in range(num_steps):
-                if time_step > 0: tf.get_variable_scope().reuse_variables()
-                (cell_output, state) = cell(inputs[:, time_step, :], state)
-                outputs.append(cell_output)
+        inputs = [tf.squeeze(input_, [1])
+                  for input_ in tf.split(1, num_steps, inputs)]
+        outputs, state = tf.nn.rnn(cell, inputs, initial_state=self._initial_state)
+        # outputs = []
+        # state = self._initial_state
+        # with tf.variable_scope("RNN"):
+        #     for time_step in range(num_steps):
+        #         if time_step > 0: tf.get_variable_scope().reuse_variables()
+        #         (cell_output, state) = cell(inputs[:, time_step, :], state)
+        #         outputs.append(cell_output)
+        ##############################################################################
 
         output = tf.reshape(tf.concat(1, outputs), [-1, size])
         softmax_w = tf.get_variable(
@@ -260,9 +263,10 @@ def run_epoch(session, model, data, eval_op, verbose=False):
     for step, (x, y) in enumerate(reader.ptb_iterator(data, model.batch_size,
                                                       model.num_steps)):
         fetches = [model.cost, model.final_state, eval_op]
-        feed_dict = {}
-        feed_dict[model.input_data] = x
-        feed_dict[model.targets] = y
+        feed_dict = {
+            model.input_data: x,
+            model.targets: y,
+        }
         for i, (c, h) in enumerate(model.initial_state):
             feed_dict[c] = state[i].c
             feed_dict[h] = state[i].h
@@ -311,6 +315,7 @@ def main(_):
         with tf.variable_scope("model", reuse=True, initializer=initializer):
             mvalid = PTBModel(is_training=False, config=config)
             mtest = PTBModel(is_training=False, config=eval_config)
+            saver = tf.train.Saver()
 
         tf.initialize_all_variables().run()
 
@@ -328,6 +333,8 @@ def main(_):
         test_perplexity = run_epoch(session, mtest, test_data, tf.no_op())
         print("Test Perplexity: %.3f" % test_perplexity)
 
+        if FLAGS.save_path is not None:
+            saver.save(session, FLAGS.save_path + '/model.ckpt')
 
 if __name__ == "__main__":
     tf.app.run()
