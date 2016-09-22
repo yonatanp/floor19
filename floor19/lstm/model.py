@@ -65,6 +65,9 @@ class PTBModel(object):
         self._cost = cost = tf.reduce_sum(loss) / batch_size
         self._final_state = state
 
+        self.probabilities = tf.nn.softmax(logits)
+        self.logits = logits
+
         if not is_training:
             return
 

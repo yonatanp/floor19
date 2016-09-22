@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 
+import numpy as np
 import tensorflow as tf
 
 from .model import PTBModel
@@ -13,14 +14,44 @@ flags.DEFINE_string(
 flags.DEFINE_bool("use_fp16", False,
                   "Train using 16-bit floats instead of 32bit floats")
 flags.DEFINE_string("checkpoint_file", None, "file with saved model parameters")
-flags.DEFINE_integer('n_words', 1, "number of words")
+flags.DEFINE_integer('seed', None, "initial word")
+flags.DEFINE_integer('n_words', 1, "number of words to generate")
 
 FLAGS = flags.FLAGS
+
+
+def generate(session, model, seed, n_words, eval_op):
+    words = [seed]
+
+    state = session.run(model.initial_state)
+
+    for n in xrange(n_words):
+        fetches = [model.cost, model.final_state, model.probabilities, model.logits, eval_op]
+
+        x = np.array([[words[-1]]])
+
+        feed_dict = {
+            model.input_data: x,
+            model.targets: x,
+        }
+
+        for i, (c, h) in enumerate(model.initial_state):
+            feed_dict[c] = state[i].c
+            feed_dict[h] = state[i].h
+
+        cost, state, probs, logits, _ = session.run(fetches, feed_dict)
+
+        words.append(np.argmax(probs, 1))
+
+    return words
 
 
 def main(_):
     if FLAGS.checkpoint_file is None:
         raise ValueError("Must set --checkpoint_file")
+
+    if FLAGS.seed is None:
+        raise ValueError("Must set --seed")
 
     eval_config = get_config(FLAGS.model)
     eval_config.batch_size = 1
@@ -39,22 +70,8 @@ def main(_):
         saver.restore(session, FLAGS.checkpoint_file)
         print "Model parameters restored from disk"
 
-        # for i in range(config.max_max_epoch):
-        #     lr_decay = config.lr_decay ** max(i - config.max_epoch, 0.0)
-        #     m.assign_lr(session, config.learning_rate * lr_decay)
-        #
-        #     print("Epoch: %d Learning rate: %.3f" % (i + 1, session.run(m.lr)))
-        #     train_perplexity = run_epoch(session, m, train_data, m.train_op,
-        #                                  verbose=True)
-        #     print("Epoch: %d Train Perplexity: %.3f" % (i + 1, train_perplexity))
-        #     valid_perplexity = run_epoch(session, mvalid, valid_data, tf.no_op())
-        #     print("Epoch: %d Valid Perplexity: %.3f" % (i + 1, valid_perplexity))
-        #
-        # test_perplexity = run_epoch(session, mtest, test_data, tf.no_op())
-        # print("Test Perplexity: %.3f" % test_perplexity)
-        #
-        # if FLAGS.save_path is not None:
-        #     saver.save(session, FLAGS.save_path + '/model.ckpt')
+        words = generate(session, model, FLAGS.seed, FLAGS.n_words, tf.no_op())
+        print words
 
 
 if __name__ == "__main__":
