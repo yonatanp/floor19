@@ -14,31 +14,34 @@ class TextProcessing(object):
 
     def getFreqDict(self, hebrew=True):
         if hebrew:
-            cleaned_words_list = self.cleanTextHebrew(self.text)
+            cleaned_words_list = self.cleanTextHebrew()
         else:
-            cleaned_words_list = self.cleanTextEnglish(self.text)
+            cleaned_words_list = self.cleanTextEnglish()
         print "cleaned_words_list", cleaned_words_list
         sum_words = len(cleaned_words_list)
         freq_dict = dict((word, count/float(sum_words)) for word, count in Counter(cleaned_words_list).iteritems())
         return freq_dict
 
-    def cleanTextEnglish(self, text):
+    def cleanTextEnglish(self):
         all_kw = []
-        for w in nltk.word_tokenize(text):
+        for w in nltk.word_tokenize(self.text):
             ww = self.st.stem(w).lower()
             if ww.isalpha and ww not in ENGLISH_STOPWORDS:
                 all_kw.append(ww)
         #### TODO - change all_kw to be a a list of all KW in space
         return self.removeWordNotInSpace(all_kw, all_kw)
 
-    def cleanTextHebrew(self, text):
+    def cleanTextHebrew(self, exclude_punct=False):
         tok_s = []
-        for i in tokenize(text):
-            if i[0] == "HEB":
+        for i in tokenize(self.text):
+            if exclude_punct is True:
+                if i[0] == "HEB":
+                    tok_s.append(i[1])
+            else:
                 tok_s.append(i[1])
+
         return tok_s
 
-   
     def removeWordNotInSpace(self, word_sen, gen_space):
         return np.intersect1d(word_sen, gen_space)
 

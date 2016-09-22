@@ -42,6 +42,5 @@ class TalkBacker(object):
     def getAllOptinalTalkBacks(self):
         return OPTIONAL_TALKBACKS
 
-#if __name__ == "__main__":
-# from TalkBacker import TalkBacker
-# TalkBacker(given_article).suggest()
+if __name__ == "__main__":
+    TalkBacker().suggest()
