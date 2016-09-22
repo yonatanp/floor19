@@ -17,6 +17,7 @@ class TextProcessing(object):
         return freq_dict
 
     def cleanTextEnglish(self, text):
+        return [t for t in text]
         # Remove stop words + tokenization
         clean_tokens = np.unique([string.stem(i).lower() for i in nltk.word_tokenize(text) if
                                   i.isalpha() and string.stem(i).lower() not in ENGLISH_STOPWORDS])

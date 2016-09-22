@@ -1,6 +1,6 @@
 import numpy as np
 import collections
-from floor19.TextProcessing import TextProcessing
+from TextProcessing import TextProcessing
 
 class TextSimilarity(object):
 
