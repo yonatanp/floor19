@@ -1,0 +1,17 @@
+{
+  "manifest_version": 2,
+
+  "name": "ynet talkback suggester",
+  "version": "1.0",
+  "description": "suggest a ynet talkbacker",
+
+  "content_scripts": [
+    {
+      "matches": ["*://*.ynet.co.il/*"],
+      "js": ["content.js"]
+    }
+  ],
+
+  "permissions": ["tabs", "*://*.ynet.co.il/*"]
+}
+
