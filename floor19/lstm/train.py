@@ -57,15 +57,18 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
 import time
+import pickle
 
 import numpy as np
 import tensorflow as tf
 
-from tensorflow.models.rnn.ptb import reader
+from tensorflow.models.rnn.ptb.reader import ptb_iterator
 
 from .model import PTBModel
 from .config import get_config
+from .readdata import load_data
 
 flags = tf.flags
 logging = tf.logging
@@ -73,7 +76,7 @@ logging = tf.logging
 flags.DEFINE_string(
     "model", "small",
     "A type of model. Possible options are: small, medium, large.")
-flags.DEFINE_string("data_path", None, "data_path")
+flags.DEFINE_string("data_file", None, "corpus file to learn")
 flags.DEFINE_bool("use_fp16", False,
                   "Train using 16-bit floats instead of 32bit floats")
 flags.DEFINE_string("save_path", None, "Path for saving the trained parameters")
@@ -83,21 +86,25 @@ FLAGS = flags.FLAGS
 
 def run_epoch(session, model, data, eval_op, verbose=False):
     """Runs the model on the given data."""
+
     epoch_size = ((len(data) // model.batch_size) - 1) // model.num_steps
     start_time = time.time()
     costs = 0.0
     iters = 0
     state = session.run(model.initial_state)
-    for step, (x, y) in enumerate(reader.ptb_iterator(data, model.batch_size,
-                                                      model.num_steps)):
+
+    for step, (x, y) in enumerate(ptb_iterator(data, model.batch_size, model.num_steps)):
         fetches = [model.cost, model.final_state, eval_op]
+
         feed_dict = {
             model.input_data: x,
             model.targets: y,
         }
+
         for i, (c, h) in enumerate(model.initial_state):
             feed_dict[c] = state[i].c
             feed_dict[h] = state[i].h
+
         cost, state, _ = session.run(fetches, feed_dict)
         costs += cost
         iters += model.num_steps
@@ -111,45 +118,39 @@ def run_epoch(session, model, data, eval_op, verbose=False):
 
 
 def main(_):
-    if not FLAGS.data_path:
-        raise ValueError("Must set --data_path to PTB data directory")
+    if not FLAGS.data_file:
+        raise ValueError("Must set --data_file")
 
-    raw_data = reader.ptb_raw_data(FLAGS.data_path)
-    train_data, valid_data, test_data, _ = raw_data
+    data, vocab = load_data(FLAGS.data_file)
+    print("Vocabulary size: %d" % len(vocab))
+
+    if FLAGS.save_path is not None:
+        with open(os.path.join(FLAGS.save_path, "vocabulary.pkl"), 'w') as f:
+            pickle.dump(vocab, f)
 
     config = get_config(FLAGS.model)
-    eval_config = get_config(FLAGS.model)
-    eval_config.batch_size = 1
-    eval_config.num_steps = 1
+    config.vocab_size = len(vocab)
 
     with tf.Graph().as_default(), tf.Session() as session:
-        initializer = tf.random_uniform_initializer(-config.init_scale,
-                                                    config.init_scale)
+        initializer = tf.random_uniform_initializer(-config.init_scale, config.init_scale)
         with tf.variable_scope("model", reuse=None, initializer=initializer):
-            m = PTBModel(is_training=True, config=config, use_fp16=FLAGS.use_fp16)
-        with tf.variable_scope("model", reuse=True, initializer=initializer):
-            mvalid = PTBModel(is_training=False, config=config, use_fp16=FLAGS.use_fp16)
-            mtest = PTBModel(is_training=False, config=eval_config, use_fp16=FLAGS.use_fp16)
+            model = PTBModel(is_training=True, config=config, use_fp16=FLAGS.use_fp16)
             saver = tf.train.Saver()
 
         tf.initialize_all_variables().run()
 
         for i in range(config.max_max_epoch):
             lr_decay = config.lr_decay ** max(i - config.max_epoch, 0.0)
-            m.assign_lr(session, config.learning_rate * lr_decay)
+            model.assign_lr(session, config.learning_rate * lr_decay)
 
-            print("Epoch: %d Learning rate: %.3f" % (i + 1, session.run(m.lr)))
-            train_perplexity = run_epoch(session, m, train_data, m.train_op,
+            print("Epoch: %d Learning rate: %.3f" % (i + 1, session.run(model.lr)))
+            train_perplexity = run_epoch(session, model, data, model.train_op,
                                          verbose=True)
             print("Epoch: %d Train Perplexity: %.3f" % (i + 1, train_perplexity))
-            valid_perplexity = run_epoch(session, mvalid, valid_data, tf.no_op())
-            print("Epoch: %d Valid Perplexity: %.3f" % (i + 1, valid_perplexity))
 
-        test_perplexity = run_epoch(session, mtest, test_data, tf.no_op())
-        print("Test Perplexity: %.3f" % test_perplexity)
-
-        if FLAGS.save_path is not None:
-            saver.save(session, FLAGS.save_path + '/model.ckpt')
+            if FLAGS.save_path is not None:
+                saver.save(session, os.path.join(FLAGS.save_path, 'model.ckpt'), global_step=i+1)
+                print("Saved checkpoint")
 
 if __name__ == "__main__":
     tf.app.run()
