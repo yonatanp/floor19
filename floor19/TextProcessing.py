@@ -32,6 +32,7 @@ class TextProcessing(object):
         return remove_word_not_in_space(all_kw,all_kw)
 
 
+
     def cleanTextHebrew(self, text):
         tok_s = []
         for i in tokenize(s):
