@@ -2,8 +2,8 @@ import nltk
 from TextSimilarity import TextSimilarity
 
 # TODO: to be replaced
-GIVEN_ARTICLE = 'abc'
-OPTIONAL_TALKBACKS = ['a', 'r', 't']
+GIVEN_ARTICLE = 'b c d'
+OPTIONAL_TALKBACKS = ['b', 'r', 't']
 
 nltk.download('punkt')
 

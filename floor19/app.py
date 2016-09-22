@@ -4,7 +4,7 @@ from TalkBacker import TalkBacker
 
 app = Flask(__name__)
 
-GIVEN_ARTICLE = 'abc'
+GIVEN_ARTICLE = 'b c d'
 THRESHOLD = 0.3
 
 @app.route('/talkbacks', methods = ['GET'])
