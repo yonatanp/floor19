@@ -1,56 +1,48 @@
 # -*- coding: utf-8 -*-
-import scrapy
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.selector import Selector
-
 from scraper.items import TalkbackItem, TestItem, ArticleItem
 
-MAX_ARTICLES = 500
-INCLUDE_TALKBACKS = True # False
 
-
-class TalkbackSpider(CrawlSpider):
-    name = "talkback"
+class YnetChannelSpider(CrawlSpider):
     allowed_domains = ["www.ynet.co.il"]
-    start_urls = [
-        # Yair Lapid
-        #"http://www.ynet.co.il/articles/0,7340,L-4858313,00.html",
-        # [TB] "http://www.ynet.co.il/Ext/App/TalkBack/CdaViewOpenTalkBack/0,11382,L-4858313,00.html",
 
-        # Zoabi
-        # "http://www.ynet.co.il/Ext/App/TalkBack/CdaViewOpenTalkBack/0,11382,L-3898005,00.html",
+    def __init__(self, max_articles=50, include_talkbacks=True, *args, **kwargs):
+        self.max_articles = int(max_articles)
+        self.include_talkbacks = True if str(include_talkbacks).lower() == "true" else False
+        self.init()
+        super(YnetChannelSpider, self).__init__(*args, **kwargs)
 
-        # Index: news -> national
-        "http://www.ynet.co.il/home/0,7340,L-188,00.html"
-    ]
+    def init(self):
+        self.stats_articles_processed = 0
+        self._initRules()
 
-    allowed_urls = ["/articles/.*?.html"]
-    if INCLUDE_TALKBACKS:
-        allowed_urls.append("/Ext/App/TalkBack/CdaViewOpenTalkBack/.*?.html")
-
-    rules = [
-        Rule(
-            LinkExtractor(
-                allow=allowed_urls,
-                deny=[
-                    # "RSS Updates"
-                    "/articles/0,7340,L-3369891,00.html",
-                ],
-                # restrict_xpaths=['//a[@class="index"]']
-            ),
-            callback="parse_items",
-            follow=True,
-        )
-    ]
+    def _initRules(self):
+        allowed_urls = ["/articles/.*?.html"]
+        if self.include_talkbacks:
+            allowed_urls.append("/Ext/App/TalkBack/CdaViewOpenTalkBack/.*?.html")
+        self.rules = [
+            Rule(
+                LinkExtractor(
+                    allow=allowed_urls,
+                    deny=[
+                        # "RSS Updates"
+                        "/articles/0,7340,L-3369891,00.html",
+                    ],
+                    # restrict_xpaths=['//a[@class="index"]']
+                ),
+                callback="parse_items",
+                follow=True,
+            )
+        ]
 
     # Maybe not the best way, but I do not want to harvest links from pages that are outside National limits
-    ALLOWED_CHANNEL_LOGOS = ["national.gif"]
     def is_article_in_allowed_channel(self, response):
         return any(
             src.endswith(logo)
             for src in response.xpath("//img/@src").extract()
-            for logo in self.ALLOWED_CHANNEL_LOGOS
+            for logo in self.__class__.allowed_channel_logos
         )
 
     def _requests_to_follow(self, response):
@@ -63,10 +55,10 @@ class TalkbackSpider(CrawlSpider):
             if self.article_process_limit_reached():
                 should_follow = False
         if should_follow:
-            for x in super(TalkbackSpider, self)._requests_to_follow(response):
+            for x in super(YnetChannelSpider, self)._requests_to_follow(response):
                 yield x
         else:
-            print "*"*10, "SHOULD NOT FOLLOW:", response.url
+            print "*" * 10, "SHOULD NOT FOLLOW:", response.url
 
     def parse_items(self, response):
         if "Ext/App/TalkBack/CdaViewOpenTalkBack" in response.url:
@@ -80,17 +72,14 @@ class TalkbackSpider(CrawlSpider):
     def parse_start_url(self, response):
         return [x for x in self.parse_items(response)]
 
-    # TODO: this is a hack
-    stats_articles_processed = 0
-    MAX_ARTICLES_TO_PROCESS = MAX_ARTICLES
     def article_process_limit_reached(self):
-        return self.stats_articles_processed >= self.MAX_ARTICLES_TO_PROCESS
+        return self.stats_articles_processed >= self.max_articles
 
     def parse_article(self, response):
         if self.article_process_limit_reached():
             return
         self.stats_articles_processed += 1
-        print "*"*10, "URL:", response.url
+        print "*" * 10, "ARTICLE URL:", response.url
         print >> open("urls_temp.txt", "a"), response.url
 
         article_texts = []
@@ -134,3 +123,95 @@ class TalkbackSpider(CrawlSpider):
                 index=index,
                 article_id=article_id,
             )
+
+
+class NationalNewsSpider(YnetChannelSpider):
+    name = "national"
+    start_urls = [
+        # Index: news -> national
+        "http://www.ynet.co.il/home/0,7340,L-188,00.html"
+    ]
+    allowed_channel_logos = ["national.gif"]
+
+
+class NationalNewsSpider(YnetChannelSpider):
+    name = "politics"
+    start_urls = [
+        # Index: news -> politics
+        "http://www.ynet.co.il/home/0,7340,L-185,00.html"
+    ]
+    allowed_channel_logos = ["politics.gif"]
+
+
+class SportsNewsSpider(YnetChannelSpider):
+    name = "sports"
+    start_urls = [
+        "http://www.ynet.co.il/home/0,7340,L-3,00.html"
+    ]
+    allowed_channel_logos = [
+        # bloody hell ynet. this is your sports logo url?
+        "short/commerce/2016/links/21/1.png"
+    ]
+
+
+class DatingNewsSpider(YnetChannelSpider):
+    name = "dating"
+    start_urls = [
+        "http://www.ynet.co.il/home/0,7340,L-3925,00.html"
+    ]
+    allowed_channel_logos = [
+        # because every png should be stored differently
+        "PicServer4/2016/01/18/6763527/coteret2.png",
+        "PicServer/02202003/247088/6.gif",
+    ]
+
+
+class HealthNewsSpider(YnetChannelSpider):
+    name = "health"
+    start_urls = ["http://www.ynet.co.il/home/0,7340,L-1208,00.html"]
+    allowed_channel_logos = [
+        "PicServer4/2016/04/05/6921963/888.jpg",
+        "k_health.gif",
+    ]
+
+
+class EducationNewsSpider(YnetChannelSpider):
+    name = "education"
+    start_urls = ["http://www.ynet.co.il/home/0,7340,L-10511,00.html"]
+    allowed_channel_logos = ["limudim1024_(10).jpg"]
+
+
+class ParentsNewsSpider(YnetChannelSpider):
+    name = "parents"
+    start_urls = ["http://www.ynet.co.il/home/0,7340,L-3052,00.html"]
+    allowed_channel_logos = ["kotarot_parents.gif"]
+
+
+class DigitalNewsSpider(YnetChannelSpider):
+    name = "digital"
+    start_urls = ["http://www.ynet.co.il/home/0,7340,L-544,00.html"]
+    allowed_channel_logos = [
+        "digital_coteret.jpg",
+        "science-_title.jpg",
+    ]
+
+
+class CarsNewsSpider(YnetChannelSpider):
+    name = "cars"
+    start_urls = ["http://www.ynet.co.il/home/0,7340,L-550,00.html"]
+    allowed_channel_logos = [
+        "k_wheels.gif",
+        "308303/koteret.gif",
+        "k_newscar.gif",
+        "k_ziburi.gif"
+    ]
+
+
+class EconomyNewsSpider(YnetChannelSpider):
+    name = "economy"
+    start_urls = ["http://www.ynet.co.il/home/0,7340,L-6,00.html"]
+    allowed_channel_logos = [
+        "kalkala.gif",
+        "SHUCK.jpg",
+        "6958097/H_title.jpg",
+    ]
