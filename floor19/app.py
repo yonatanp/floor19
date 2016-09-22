@@ -6,20 +6,25 @@ from flask import Flask
 from TalkBacker import TalkBacker
 import requests
 from lxml import html
+from flask_cors import CORS, cross_origin
+import flask
 
 app = Flask(__name__)
+cors = CORS(app, resources={r"/talkbacks/*": {"origins": "*"}})
 
 THRESHOLD = 0.1
 DEFAULT_RESPONSE = "חחחחח..."
 
-@app.route('/talkbacks', methods = ['GET'])
-def get_talkbacks(url=None):
+@app.route('/talkbacks/<article_id>', methods = ['GET'])
+def get_talkbacks(article_id):
+    url = "http://www.ynet.co.il/articles/%s" % str(article_id)
     header_text, article_text = _getTextFromUrl(url)
     best_talkback, best_talkback_score = TalkBacker(article_text, header_text).suggest()
     if best_talkback_score >= THRESHOLD:
-        return best_talkback
+        res = {'talkback': best_talkback}
     else:
-        return DEFAULT_RESPONSE
+        res = {'talkback': DEFAULT_RESPONSE}
+    return flask.jsonify(res)
 
 def _getTextFromUrl(url):
     page = requests.get(url)
@@ -32,9 +37,11 @@ def _getTextFromUrl(url):
         if p_text:
             article_text.append(p_text)
 
+    article_text = "\n".join(article_text)
     header_title = root.xpath("//div[contains(@class,'art_header_title')]")
-    header_title[0].text
-    return header_title, article_text
+    header_title = header_title[0].text
+
+    return header_title, article_text[0]
 
 if __name__ == '__main__':
     app.run(debug=True)

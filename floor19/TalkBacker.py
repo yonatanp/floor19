@@ -14,6 +14,8 @@ nltk.download('punkt')
 class TalkBacker(object):
 
     def __init__(self, given_article=None, header_text=None):
+        print given_article
+        print header_text
         if given_article is None:
             given_article = GIVEN_ARTICLE
         self.given_article = given_article

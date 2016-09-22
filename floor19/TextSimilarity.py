@@ -16,9 +16,12 @@ class TextSimilarity(object):
         # fill missing keys
         self._fillMissingKeys(freq_dict1, freq_dict2)
         # calc cosine distance (note we assume the same order of values)
-        freq_dict1_od = collections.OrderedDict(sorted(freq_dict1.items()))
-        freq_dict2_od = collections.OrderedDict(sorted(freq_dict2.items()))
-        return self._calcCosineDistance(freq_dict1_od.values(), freq_dict2_od.values())
+        freq_dict1_ordered = []
+        freq_dict2_ordered = []
+        for k in freq_dict1.keys():
+            freq_dict1_ordered.append(freq_dict1[k])
+            freq_dict2_ordered.append(freq_dict2[k])
+        return self._calcCosineDistance(freq_dict1_ordered, freq_dict2_ordered)
 
     def getFreqDict(self, text):
         return TextProcessing(text).getFreqDict()
@@ -30,8 +33,8 @@ class TextSimilarity(object):
                 freq_dict1[k] = 0
             if k not in freq_dict2:
                 freq_dict2[k] = 0
-        print "_fillMissingKeys: freq_dict1", freq_dict1
-        print "_fillMissingKeys: freq_dict2", freq_dict2
+        # print "_fillMissingKeys: freq_dict1", freq_dict1
+        # print "_fillMissingKeys: freq_dict2", freq_dict2
 
 
     def _calcCosineDistance(self, a, b):
