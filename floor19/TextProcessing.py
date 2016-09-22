@@ -10,12 +10,14 @@ class TextProcessing(object):
     def __init__(self, text):
         self.text = text
 
-    def getFreqDict(self, cleaned_words_list):
+    def getFreqDict(self):
+        cleaned_words_list = self.cleanTextEnglish(self.text)
         sum_words = len(cleaned_words_list)
         freq_dict = dict((word, count/float(sum_words)) for word, count in Counter(cleaned_words_list).iteritems())
         return freq_dict
 
-    def cleanTetxEnglish(self, text):
+    def cleanTextEnglish(self, text):
+        return [t for t in text]
         # Remove stop words + tokenization
         clean_tokens = np.unique([string.stem(i).lower() for i in nltk.word_tokenize(text) if
                                   i.isalpha() and string.stem(i).lower() not in ENGLISH_STOPWORDS])
