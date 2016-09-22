@@ -1,8 +1,11 @@
 from floor19.TextSimilarity import TextSimilarity
+import nltk
 
 # TODO: to be replaced
 GIVEN_ARTICLE = 'abc'
 OPTIONAL_TALKBACKS = ['a', 'r', 't']
+
+nltk.download('punkt')
 
 class TalkBacker(object):
 
