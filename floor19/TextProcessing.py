@@ -38,6 +38,7 @@ class TextProcessing(object):
                 tok_s.append(i[1])
         return tok_s
 
+   
     def removeWordNotInSpace(self, word_sen, gen_space):
         return np.intersect1d(word_sen, gen_space)
 
