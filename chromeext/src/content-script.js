@@ -1,14 +1,13 @@
 function inject() {
     addEventProxyElement('__talkbacker_chrome_ext_event_proxy', '__talkbacker_chrome_ext_event');
 
+    addScript(local("sweetalert.min.js"));
+    addStyle(local("sweetalert.css"));
+
     var main_script = addScript(local('talkbacker_inject.js'), '__talkbackerInjectScript', {
         // example for passing extension resource hints
-        resource_hint: local("images/resource_example.png"),
+        messagebox_image: local("images/talkbacker-64.png"),
     });
-
-    // // additional online resources example
-    // addStyle("https://bla/style.min.css");
-    // addScript("https://bla/code.min.js");
 }
 
 // ----------------------------------------------------------------------------------------------------------

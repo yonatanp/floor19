@@ -20,24 +20,18 @@
             .css("top", 0)
             .css("right", 0)
             .hide()
+            .appendTo($("body"))
         ;
-        // d.animate({
-        //     "display":"block"
-        // }, 5000, function() {});
 
-        // d.slideDown("slow", function() {
         fetchTalkback(function(suggestion) {
-            d.show();
             d.click(function() {
                 showSuggestion(suggestion);
             })
+            d.fadeIn(350);
         });
-
-        d.appendTo($("body"));
     });
 
     function fetchTalkback(callback) {
-        //alert(injected_variables['resource_hint']);
         console.log("TALKBACKER DEBUG:\n" +
             "resource hint: " + injected_variables['resource_hint'] + "\n" +
             "url: " + document.location.href
@@ -63,7 +57,11 @@
 
     function showSuggestion(response) {
         // alert("Great article!\nWe recommend talking back with:\n\n" + response.talkback + "\n\nOR...\n\n" + response.talkback_list.join("\n"));
-        alert("כתבה מהממת!\nלמה שלא תשדרג אותה עם טוקבק עסיסי:\n\n" + response.talkback);
+        swal({
+            title: "טוקבק עסיסי - משדרג כל כתבה!",
+            text: response.talkback,
+            imageUrl: injected_variables.messagebox_image,
+        });
     }
 
     // ------------------------------------------------------------------------------------------------------
@@ -88,13 +86,4 @@
         hiddenDiv.innerText = JSON.stringify(data);
         hiddenDiv.dispatchEvent(extensionSignalEvent);
     }
-
-    // ------------------------------------------------------------------------------------------------------
-
-    // sendMessageToExtension({
-    //     labs_chrome_ext: {
-    //         active: (enhancements.length > 0),
-    //         enhancements: enhancements
-    //     }
-    // })
 }());
