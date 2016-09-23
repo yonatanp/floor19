@@ -116,7 +116,10 @@ def main(_, should_convert_to_unicode=False):
 def run_single_run(seed, n_words=60, params=None, model="small", should_convert_to_unicode=True):
     if params is None:
         import lstm, os
-        params = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(lstm.__file__)), "..", "..", "params"))
+        if "DATAHACK_PARAMS" in os.environ:
+            params = os.environ["DATAHACK_PARAMS"]
+        else:
+            params = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(lstm.__file__)), "..", "..", "params"))
     global FLAGS
     FLAGS.seed = seed
     FLAGS.n_words = n_words
