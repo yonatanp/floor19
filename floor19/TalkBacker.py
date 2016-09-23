@@ -57,7 +57,10 @@ class TalkBacker(object):
         return candidates
 
     def getAllOptinalTalkBacks(self):
-        seeds = self.getSeeds(self.header_text)
+        if "USE_HEADER_AS_SEED":
+            seeds = [self.genHeaderSeedSentence(self.header_text)]
+        else:
+            seeds = self.getPrioritizedTokenSeeds(self.header_text)
         options = []
         for seed in seeds:
             try:
@@ -75,7 +78,11 @@ class TalkBacker(object):
         print "run_single_run", repr(seed)
         return run_single_run(seed, n_words=100)
 
-    def getSeeds(self, header_text):
+    def genHeaderSeedSentence(self, header_text):
+        title_kw = cleanTextHebrew(header_text)
+        return " ".join(title_kw)
+
+    def getPrioritizedTokenSeeds(self, header_text):
         title_kw = cleanTextHebrew(header_text)
         title_kw_score = {}
         for t in title_kw:
