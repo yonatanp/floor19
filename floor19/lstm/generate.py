@@ -85,7 +85,7 @@ def main(_):
 
         if ckpt and ckpt.model_checkpoint_path:
             saver.restore(session, ckpt.model_checkpoint_path)
-            print "Model parameters restored from disk"
+            # print "Model parameters restored from disk"
 
         else:
             print "No checkpoint found!"
