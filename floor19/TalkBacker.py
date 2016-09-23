@@ -42,11 +42,15 @@ class TalkBacker(object):
         print "given_article", self.given_article
         print "optional_talkbacks", optional_talkbacks
 
+        if not optional_talkbacks:
+            return "חחחחחח", 0.99999
+
         best_talkback_score = 0
         best_talkback = None
+        similarity_calc = TextSimilarity(self.given_article)
         for talkback in optional_talkbacks:
             print "----------------"
-            current_score = TextSimilarity(self.given_article, talkback).calcSimilarity()
+            current_score = similarity_calc.calcSimilarity(talkback)
             if current_score > best_talkback_score:
                 best_talkback_score = current_score
                 best_talkback = talkback
@@ -54,22 +58,32 @@ class TalkBacker(object):
 
         return best_talkback, best_talkback_score
 
-    def getArticleTopWords(self, header_text):
-        return header_text[0]
-
     def getAllOptinalTalkBacks(self):
-        seed = self.getSeeds(self.header_text)
-        return self.getModelResult(seed)
+        seeds = self.getSeeds(self.header_text)
+        options = []
+        for seed in seeds:
+            try:
+                options.extend(self.getModelResult(seed))
+                if options:
+                    break
+            except ValueError:
+                import traceback
+                traceback.print_exc()
+                continue
+        return options
 
     def getModelResult(self, seed):
-        return OPTIONAL_TALKBACKS
+        # return OPTIONAL_TALKBACKS
+        from lstm.generate import run_single_run
+        print "run_single_run", repr(seed)
+        return run_single_run(seed, n_words=100)
 
     def getSeeds(self, header_text):
         title_kw = cleanTextHebrew(header_text)
         title_kw_score = {}
         for t in title_kw:
             title_kw_score[t] = self.idf_dict.get(t,0)
-        return sorted(title_kw_score.items(), key=lambda x: x[1])[::-1][:10]
+        return [x[0] for x in sorted(title_kw_score.items(), key=lambda x: x[1])[::-1][:10]]
         #return header_text[0]
 
 if __name__ == "__main__":

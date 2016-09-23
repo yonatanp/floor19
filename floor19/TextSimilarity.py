@@ -4,25 +4,26 @@ from TextProcessing import TextProcessing
 
 class TextSimilarity(object):
 
-    def __init__(self, text1, text2):
+    def __init__(self, text1):
         self.text1 = text1
-        self.text2 = text2
+        self.freq_dict1 = self.getFreqDict(self.text1)
 
-    def calcSimilarity(self):
-        freq_dict1 = self.getFreqDict(self.text1)
-        freq_dict2 = self.getFreqDict(self.text2)
-        print
-        print "ARTICLE:"
-        w = [x for x in freq_dict1 if freq_dict1[x]]
-        print "  %d words found" % len(w)
-        for i in w[:10]:
-            print "  ", i, "(%s)" % freq_dict1[i]
-        print
-        print "TALKBACK SUGGESTED:"
-        w = [x for x in freq_dict2 if freq_dict2[x]]
-        print "  %d words found" % len(w)
-        for i in w[:10]:
-            print "  ", i, "(%s)" % freq_dict2[i]
+    def calcSimilarity(self, text2):
+        freq_dict1 = self.freq_dict1
+        freq_dict2 = self.getFreqDict(text2)
+        if not "DEBUG":
+            print
+            print "ARTICLE:"
+            w = [x for x in freq_dict1 if freq_dict1[x]]
+            print "  %d words found" % len(w)
+            for i in w[:10]:
+                print "  ", i, "(%s)" % freq_dict1[i]
+            print
+            print "TALKBACK SUGGESTED:"
+            w = [x for x in freq_dict2 if freq_dict2[x]]
+            print "  %d words found" % len(w)
+            for i in w[:10]:
+                print "  ", i, "(%s)" % freq_dict2[i]
         # print "freq_dict1", freq_dict1
         # print "freq_dict2", freq_dict2
         # fill missing keys
