@@ -12,7 +12,7 @@ import flask
 app = Flask(__name__)
 cors = CORS(app, resources={r"/talkbacks/*": {"origins": "*"}})
 
-THRESHOLD = 0.1
+THRESHOLD = 0.0
 DEFAULT_RESPONSE = "חחחחח..."
 
 @app.route('/talkbacks/<article_id>', methods = ['GET'])
@@ -41,7 +41,7 @@ def _getTextFromUrl(url):
     header_title = root.xpath("//div[contains(@class,'art_header_title')]")
     header_title = header_title[0].text
 
-    return header_title, article_text[0]
+    return header_title, article_text
 
 if __name__ == '__main__':
     app.run(debug=True)
