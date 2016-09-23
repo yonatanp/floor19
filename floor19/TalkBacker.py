@@ -3,6 +3,9 @@
 
 import nltk
 from TextSimilarity import TextSimilarity
+import json
+TFIDF_FILENAME = '../data/ynet_all_types_500_articles_tf_idf.txt'
+from HebrewTokenizer import *
 
 nltk.download('punkt')
 
@@ -17,6 +20,13 @@ OPTIONAL_TALKBACKS = map(lambda s:s.decode("UTF-8"), ["התרגיל מחירי �
 GIVEN_ARTICLE = None
 GIVEN_HEADER_FILE = None
 
+def cleanTextHebrew(text):
+    tok_s = []
+    for i in tokenize(text):
+            if i[0] == "HEB":
+                tok_s.append(i[1])
+    return tok_s
+    
 class TalkBacker(object):
 
     def __init__(self, given_article=GIVEN_ARTICLE, header_text=GIVEN_HEADER_FILE):
@@ -24,6 +34,8 @@ class TalkBacker(object):
         print "header_text", header_text
         self.given_article = given_article
         self.header_text = header_text
+        for line in open(TFIDF_FILENAME, 'r'):
+            self.idf_dict = json.loads(line)
 
     def suggest(self):
         optional_talkbacks = self.getAllOptinalTalkBacks()
@@ -53,8 +65,12 @@ class TalkBacker(object):
         return OPTIONAL_TALKBACKS
 
     def getSeeds(self, header_text):
-        # TODO
-        return header_text[0]
+        title_kw = cleanTextHebrew(header_text)
+        title_kw_score = {}
+        for t in title_kw:
+            title_kw_score[t] = self.idf_dict.get(t,0)
+        return sorted(title_kw_score.items(), key=lambda x: x[1])[::-1][:10]
+        #return header_text[0]
 
 if __name__ == "__main__":
     TalkBacker().suggest()
