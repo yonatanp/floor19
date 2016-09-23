@@ -3,7 +3,7 @@ import lstm
 import lstm.generate
 
 # run as single-threaded function
-def run_single_run(seed, n_words=None, params=None, model="small", should_convert_to_unicode=True, max_per_seed=None):
+def run_single_run(seed, n_words=None, params=None, model=None, should_convert_to_unicode=True, max_per_seed=None):
     if params is None:
         if "DATAHACK_PARAMS" in os.environ:
             params = os.environ["DATAHACK_PARAMS"]
@@ -15,6 +15,9 @@ def run_single_run(seed, n_words=None, params=None, model="small", should_conver
 
     if n_words is None:
         n_words = int(os.environ.get("DATAHACK_NUMWORDS", 60))
+
+    if model is None:
+        model = os.environ.get("DATAHACK_MODEL", "small")
 
     FLAGS = lstm.generate.FLAGS
     FLAGS.seed = seed
