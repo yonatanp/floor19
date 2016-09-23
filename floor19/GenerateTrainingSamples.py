@@ -4,6 +4,8 @@ from TextProcessing import TextProcessing
 UNKNOWN = 'unknown'
 LEGAL_PUNCT = ['!','.',':']
 ILLEGAL_PUNCT = ["'", '"', "=", ';', ',', '-', ')', '(']
+TFIDF_FILE = '../data/comments_corp_tfidf.txt'
+OUTPUT_FILE = 'talkbacks_training_set2.txt'
 
 data = []
 files = [
@@ -19,15 +21,16 @@ files = [
 ]
 
 for file in files:
+    print "file", file
     for line in open(file, 'rb'):
         line_dict = json.loads(line)
         processed_list = TextProcessing(line_dict['title_text']).cleanTextHebrew(exclude_punct=False)
         data.append(processed_list)
 
-word2idf = json.loads(open('../data/ynet_all_types_500_articles_tf_idf.txt', 'rb').read())
-vocabulary = word2idf.keys() #len=105178
+word2idf = json.loads(open(TFIDF_FILE, 'rb').read())
+vocabulary = word2idf.keys()
 
-file = open('talkbacks_training_set.txt', 'wb')
+file = open(OUTPUT_FILE, 'wb')
 for d_list in data:
     for d in d_list:
         if d not in ILLEGAL_PUNCT:

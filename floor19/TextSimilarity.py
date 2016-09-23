@@ -42,4 +42,7 @@ class TextSimilarity(object):
         # use numpy's dot product to calculate the cosine similarity
         cosine_score = np.dot(a, b) / np.sqrt(np.dot(a, a) * np.dot(b, b))
         print "cosine_score", cosine_score
-        return cosine_score
+        if cosine_score:
+            return cosine_score
+        else:
+            return 0

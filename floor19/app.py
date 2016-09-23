@@ -41,7 +41,7 @@ def _getTextFromUrl(url):
     header_title = root.xpath("//div[contains(@class,'art_header_title')]")
     header_title = header_title[0].text
 
-    return header_title, article_text[0]
+    return header_title, article_text
 
 if __name__ == '__main__':
     app.run(debug=True)
