@@ -19,24 +19,24 @@
             .css("position", "absolute")
             .css("top", 0)
             .css("right", 0)
-            .css("display", "hidden")
+            .hide()
         ;
-        d.animate({
-            "display":"block"
-        }, 5000, function() {});
+        // d.animate({
+        //     "display":"block"
+        // }, 5000, function() {});
 
-        d.click(function() {
-            d.slideDown("slow", function() {
-                suggestTalkback();
-            });
+        // d.slideDown("slow", function() {
+        fetchTalkback(function(suggestion) {
+            d.show();
+            d.click(function() {
+                showSuggestion(suggestion);
+            })
         });
 
         d.appendTo($("body"));
-
-        // suggestTalkback();
     });
 
-    function suggestTalkback() {
+    function fetchTalkback(callback) {
         //alert(injected_variables['resource_hint']);
         console.log("TALKBACKER DEBUG:\n" +
             "resource hint: " + injected_variables['resource_hint'] + "\n" +
@@ -47,18 +47,23 @@
             console.log("ARTICLE!");
             // Do the big ass cross-site scripting
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", "http://d3f28d1b.ngrok.io/talkbacks/" + article_id, true);
+            xhr.open("GET", "http://datahack.dev.meginon.com:5000/talkbacks/" + article_id, true);
             xhr.onreadystatechange = function() {
                 if (xhr.readyState == 4) {
                     // JSON.parse does not evaluate the attacker's scripts.
-                    var resp = JSON.parse(xhr.responseText);
-                    console.log("RESP: " + resp);
-                    console.log("talkback: " + resp.talkback);
-                    alert("Great article!\nWe recommend talking back with:\n\n" + resp.talkback);
+                    var response = JSON.parse(xhr.responseText);
+                    console.log("RESP: " + response);
+                    console.log("talkback: " + response.talkback);
+                    callback(response);
                 }
             };
             xhr.send();
         }
+    }
+
+    function showSuggestion(response) {
+        // alert("Great article!\nWe recommend talking back with:\n\n" + response.talkback + "\n\nOR...\n\n" + response.talkback_list.join("\n"));
+        alert("כתבה מהממת!\nלמה שלא תשדרג אותה עם טוקבק עסיסי:\n\n" + response.talkback);
     }
 
     // ------------------------------------------------------------------------------------------------------
