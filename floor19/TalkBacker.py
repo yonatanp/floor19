@@ -46,8 +46,15 @@ class TalkBacker(object):
         return header_text[0]
 
     def getAllOptinalTalkBacks(self):
-        #getArticleTopWords
+        seed = self.getSeeds(self.header_text)
+        self.getModelResult(seed)
+
+    def getModelResult(self, seed):
         return OPTIONAL_TALKBACKS
+
+    def getSeeds(self, header_text):
+        # TODO
+        return header_text[0]
 
 if __name__ == "__main__":
     TalkBacker().suggest()
