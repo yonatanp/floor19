@@ -48,15 +48,12 @@ class TalkBacker(object):
         best_talkback_score = 0
         best_talkback = None
         similarity_calc = TextSimilarity(self.given_article)
-        for talkback in optional_talkbacks:
-            print "----------------"
-            current_score = similarity_calc.calcSimilarity(talkback)
-            if current_score > best_talkback_score:
-                best_talkback_score = current_score
-                best_talkback = talkback
-            print "----------------"
-
-        return best_talkback, best_talkback_score
+        scores = {}
+        for talkback in list(set(optional_talkbacks)):
+            scores[talkback] = similarity_calc.calcSimilarity(talkback)
+        candidates = sorted(scores.items(), key=lambda (k,v):-v)
+        # return candidates[:1]
+        return candidates
 
     def getAllOptinalTalkBacks(self):
         seeds = self.getSeeds(self.header_text)
