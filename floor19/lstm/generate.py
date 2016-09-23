@@ -22,7 +22,7 @@ flags.DEFINE_integer('n_words', 1, "number of words to generate")
 FLAGS = flags.FLAGS
 
 
-def generate(session, model, seed, n_words, eval_op):
+def generate(session, model, seed, n_words, eval_op, unknown=None):
     words = [seed]
 
     state = session.run(model.initial_state)
@@ -43,12 +43,14 @@ def generate(session, model, seed, n_words, eval_op):
 
         cost, state, probs, logits, _ = session.run(fetches, feed_dict)
 
-        words.append(np.argmax(probs, 1)[0])
+        s = sorted(xrange(probs.shape[1]), key=lambda _x: probs[0, _x], reverse=True)
+        words.append(s[s[0] == unknown])
+        # words.append(np.argmax(probs, 1)[0])
 
     return words
 
 
-def main(_):
+def main(_, should_convert_to_unicode=False):
     if FLAGS.checkpoint_dir is None:
         raise ValueError("Must set --checkpoint_dir")
 
@@ -56,12 +58,26 @@ def main(_):
         raise ValueError("Must set --seed")
 
     with open(os.path.join(FLAGS.checkpoint_dir, "vocabulary.pkl")) as f:
-        vocab = pickle.load(f)
+        utf_vocab = pickle.load(f)
+
+    if should_convert_to_unicode:
+        vocab = dict((x.decode("utf-8"),y) for (x,y) in utf_vocab.iteritems())
+    else:
+        vocab = utf_vocab
 
     backvocab = {y: x for x, y in vocab.iteritems()}
+    if should_convert_to_unicode:
+        backvocab[vocab[u'unknown']] = '---'
+        backvocab[vocab[u'<eos>']] = '\n'
+    else:
+        backvocab[vocab['unknown']] = '---'
+        backvocab[vocab['<eos>']] = '\n'
+
+    print "--- vocab: %d items, e.g. %s" % (len(vocab), vocab.keys()[:5])
+
 
     if FLAGS.seed not in vocab:
-        raise ValueError("Seed '%s' not in vocabulary" % FLAGS.seed)
+        raise ValueError("Seed '%s' not in vocabulary" % (FLAGS.seed,))
 
     config = get_config(FLAGS.model)
     config.vocab_size = len(vocab)
@@ -81,15 +97,38 @@ def main(_):
 
         if ckpt and ckpt.model_checkpoint_path:
             saver.restore(session, ckpt.model_checkpoint_path)
-            print "Model parameters restored from disk"
+            # print "Model parameters restored from disk"
 
         else:
             print "No checkpoint found!"
             return
 
-        words = generate(session, model, vocab[FLAGS.seed], FLAGS.n_words, tf.no_op())
-        print ' '.join(backvocab[x] for x in words)
+        words = generate(session, model, vocab[FLAGS.seed], FLAGS.n_words, tf.no_op(), unknown=vocab['unknown'])
 
+        result = [backvocab[x] for x in words]
+        print ' '.join(result)
+        # for x in words:
+        #     print backvocab[x]
+
+        return result
+
+# run as single-threaded function
+def run_single_run(seed, n_words=60, params=None, model="small", should_convert_to_unicode=True):
+    if params is None:
+        import lstm, os
+        params = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(lstm.__file__)), "..", "..", "params"))
+    global FLAGS
+    FLAGS.seed = seed
+    FLAGS.n_words = n_words
+    FLAGS.checkpoint_dir = params
+    FLAGS.model = model
+    wordlist = main(123.456, should_convert_to_unicode=should_convert_to_unicode)
+    # TODO: smartify
+    return list(set([
+        x.strip()
+        for x in " ".join(wordlist).split("\n")
+        if len(x.split()) >= 3
+    ]))[:5]
 
 if __name__ == "__main__":
     tf.app.run()

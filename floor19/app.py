@@ -19,11 +19,15 @@ DEFAULT_RESPONSE = "חחחחח..."
 def get_talkbacks(article_id):
     url = "http://www.ynet.co.il/articles/%s" % str(article_id)
     header_text, article_text = _getTextFromUrl(url)
-    best_talkback, best_talkback_score = TalkBacker(article_text, header_text).suggest()
-    if best_talkback_score >= THRESHOLD:
-        res = {'talkback': best_talkback}
-    else:
-        res = {'talkback': DEFAULT_RESPONSE}
+    best_talkbacks = TalkBacker(article_text, header_text).suggest()
+    # if best_talkback_score >= THRESHOLD:
+    #     res = {'talkback': best_talkback}
+    # else:
+    #     res = {'talkback': DEFAULT_RESPONSE}
+    res = {
+        'talkback': best_talkbacks[0][0],
+        'talkback_list': [i[0] for i in best_talkbacks],
+    }
     return flask.jsonify(res)
 
 def _getTextFromUrl(url):
