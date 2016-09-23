@@ -1,0 +1,46 @@
+{
+  "manifest_version": 2,
+
+  "name": "Talkbacker Chrome Extension",
+  "short_name": "talkbacker",
+  "version": "1.0.0",
+
+  "description": "Chrome extension that that talks back on ynet articles - so you don't have to!",
+  "author": "Council of the 19th Floor",
+
+  "icons": {
+    "64": "images/talkbacker-64.png",
+    "128": "images/talkbacker-128.png"
+  },
+
+  "background": {
+    "scripts": ["background.js"]
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["*://*.ynet.co.il/*"],
+      "js": ["content-script.js"]
+    }
+  ],
+
+  "page_action": {
+    "default_icon": {
+      "19": "images/talkbacker-16.png",
+      "38": "images/talkbacker-32.png"
+    },
+    "default_title": "Talkbacker"
+  },
+
+  "permissions": [
+    "http://localhost:5000/",
+    "http://d3f28d1b.ngrok.io/",
+    "http://datahack.dev.meginon.com:5000/"
+  ],
+
+  "web_accessible_resources": [
+    "*.js",
+    "*.css",
+    "images/*.png"
+  ]
+}

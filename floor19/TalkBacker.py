@@ -6,6 +6,7 @@ from TextSimilarity import TextSimilarity
 import json
 TFIDF_FILENAME = '../data/ynet_all_types_500_articles_tf_idf.txt'
 from HebrewTokenizer import *
+from lstm_generation_adapter import run_single_run
 
 nltk.download('punkt')
 
@@ -71,7 +72,6 @@ class TalkBacker(object):
 
     def getModelResult(self, seed):
         # return OPTIONAL_TALKBACKS
-        from lstm.generate import run_single_run
         print "run_single_run", repr(seed)
         return run_single_run(seed, n_words=100)
 

@@ -112,23 +112,5 @@ def main(_, should_convert_to_unicode=False):
 
         return result
 
-# run as single-threaded function
-def run_single_run(seed, n_words=60, params=None, model="small", should_convert_to_unicode=True):
-    if params is None:
-        import lstm, os
-        params = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(lstm.__file__)), "..", "..", "params"))
-    global FLAGS
-    FLAGS.seed = seed
-    FLAGS.n_words = n_words
-    FLAGS.checkpoint_dir = params
-    FLAGS.model = model
-    wordlist = main(123.456, should_convert_to_unicode=should_convert_to_unicode)
-    # TODO: smartify
-    return list(set([
-        x.strip()
-        for x in " ".join(wordlist).split("\n")
-        if len(x.split()) >= 3
-    ]))[:5]
-
 if __name__ == "__main__":
     tf.app.run()
