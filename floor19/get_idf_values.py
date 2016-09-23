@@ -31,7 +31,7 @@ def calc_idf(docs):
         idf_vals[k[0]] = np.log10(float(N)/k[1])
     return idf_vals
 
-def calc_idf_for_file(data_type="articles", "type_f"):
+def calc_idf_for_file(data_type="articles", type_f="a"):
     f = "../data/ynet_national_500_%s.json" % data_type
     articles = []
     for line in open(f, 'r'):
@@ -47,6 +47,7 @@ def calc_idf_for_file(data_type="articles", "type_f"):
         json.dump(idf_articles, outfile)
     return idf_art
 
+
 def _get_raw_data(datatype = "articles"):  #"talkbacks"
     data = []
     for t in ["cars", "dating","digital","economy","education","health","national","parents","politics"]:
@@ -54,6 +55,8 @@ def _get_raw_data(datatype = "articles"):  #"talkbacks"
         for line in open(f, 'r'):
             data.append(json.loads(line))
     return data
+
+
 
 #articles_text = [i['full_text'] for i in articles]
 #idf_articles = calc_idf(articles_text)
