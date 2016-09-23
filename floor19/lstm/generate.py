@@ -22,7 +22,7 @@ flags.DEFINE_integer('n_words', 1, "number of words to generate")
 FLAGS = flags.FLAGS
 
 
-def generate(session, model, seed, n_words, eval_op):
+def generate(session, model, seed, n_words, eval_op, unknown=None):
     words = [seed]
 
     state = session.run(model.initial_state)
@@ -43,7 +43,9 @@ def generate(session, model, seed, n_words, eval_op):
 
         cost, state, probs, logits, _ = session.run(fetches, feed_dict)
 
-        words.append(np.argmax(probs, 1)[0])
+        s = sorted(xrange(probs.shape[1]), key=lambda _x: probs[0, _x], reverse=True)
+        words.append(s[s[0] == unknown])
+        # words.append(np.argmax(probs, 1)[0])
 
     return words
 
@@ -59,6 +61,8 @@ def main(_):
         vocab = pickle.load(f)
 
     backvocab = {y: x for x, y in vocab.iteritems()}
+    backvocab[vocab['unknown']] = '---'
+    backvocab[vocab['<eos>']] = '\n'
 
     if FLAGS.seed not in vocab:
         raise ValueError("Seed '%s' not in vocabulary" % FLAGS.seed)
@@ -87,8 +91,11 @@ def main(_):
             print "No checkpoint found!"
             return
 
-        words = generate(session, model, vocab[FLAGS.seed], FLAGS.n_words, tf.no_op())
+        words = generate(session, model, vocab[FLAGS.seed], FLAGS.n_words, tf.no_op(), unknown=vocab['unknown'])
+
         print ' '.join(backvocab[x] for x in words)
+        # for x in words:
+        #     print backvocab[x]
 
 
 if __name__ == "__main__":
