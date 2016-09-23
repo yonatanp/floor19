@@ -4,8 +4,9 @@ from TextProcessing import TextProcessing
 UNKNOWN = 'unknown'
 LEGAL_PUNCT = ['!','.',':']
 ILLEGAL_PUNCT = ["'", '"', "=", ';', ',', '-', ')', '(']
-TFIDF_FILE = '../data/comments_corp_tfidf.txt'
-OUTPUT_FILE = 'talkbacks_training_set2.txt'
+# TFIDF_FILE = '../data/comments_corp_tfidf.txt'
+TFIDF_FILE = '../data/comments_kw_tfidf_late.txt'
+OUTPUT_FILE = '../data/talkbacks_training_set3.txt'
 
 data = []
 files = [

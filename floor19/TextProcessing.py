@@ -14,8 +14,8 @@ class TextProcessing(object):
     def __init__(self, text):
         self.text = text
         self.st = LancasterStemmer()
-        for line in open(TFIDF_FILENAME, 'r'):
-            self.idf_dict = json.loads(line)
+        with open(TFIDF_FILENAME, 'r') as f:
+            self.idf_dict = json.load(f)
 
     def getFreqDict(self, hebrew=HEBREW, exclude_punct=True):
         if hebrew:

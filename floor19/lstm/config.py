@@ -62,6 +62,10 @@ class TestConfig(object):
     vocab_size = 10000
 
 
+class YnetConfig(MediumConfig):
+    pass
+
+
 def get_config(model):
     if model == "small":
         return SmallConfig()
@@ -71,5 +75,7 @@ def get_config(model):
         return LargeConfig()
     elif model == "test":
         return TestConfig()
+    elif model == "ynet":
+        return YnetConfig()
     else:
         raise ValueError("Invalid model: %s", model)
