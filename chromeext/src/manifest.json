@@ -3,7 +3,7 @@
 
   "name": "Talkbacker Chrome Extension",
   "short_name": "talkbacker",
-  "version": "1.0.0",
+  "version": "1.0.1",
 
   "description": "Chrome extension that that talks back on ynet articles - so you don't have to!",
   "author": "Council of the 19th Floor",
