@@ -16,9 +16,10 @@
         var d = $("<div/>");
         d.attr("id", "talkbacker_face")
             .html("<img src='http://megaicons.net/static/img/icons_sizes/315/1534/128/electric-shock-icon.png'/>")
-            .css("position", "absolute")
+            .css("position", "fixed")
             .css("top", 0)
             .css("right", 0)
+            .css("padding", "15px 15px 0 0")
             .hide()
             .appendTo($("body"))
         ;
@@ -57,6 +58,7 @@
 
     function showSuggestion(response) {
         // alert("Great article!\nWe recommend talking back with:\n\n" + response.talkback + "\n\nOR...\n\n" + response.talkback_list.join("\n"));
+        // multi_talkback_line = response.talkback_list.join("\n\n");
         swal({
             title: "טוקבק עסיסי - משדרג כל כתבה!",
             text: response.talkback,
