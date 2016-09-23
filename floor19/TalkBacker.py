@@ -12,7 +12,7 @@ nltk.download('punkt')
 
 # GIVEN_ARTICLE = "היום יום שני לחודש, זהו יום מאוד יפה".decode("UTF-8")
 # GIVEN_HEADER_FILE = "יום".decode("UTF-8")
-OPTIONAL_TALKBACKS = map(lambda s:s.decode("UTF-8"), ["התרגיל מחירים בטקס", "מעניין אם...", "שווה להיות סלב!", "התמונות יום", "ספורט זבל..."])
+OPTIONAL_TALKBACKS = map(lambda s:s.decode("UTF-8"), ["התרגיל מחירי מוצרים", "מעניין אם...", "שווה להיות סלב!", "התמונות יום", "ספורט זבל..."])
 
 GIVEN_ARTICLE = None
 GIVEN_HEADER_FILE = None

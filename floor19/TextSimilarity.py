@@ -11,8 +11,20 @@ class TextSimilarity(object):
     def calcSimilarity(self):
         freq_dict1 = self.getFreqDict(self.text1)
         freq_dict2 = self.getFreqDict(self.text2)
-        print "freq_dict1", freq_dict1
-        print "freq_dict2", freq_dict2
+        print
+        print "ARTICLE:"
+        w = [x for x in freq_dict1 if freq_dict1[x]]
+        print "  %d words found" % len(w)
+        for i in w[:10]:
+            print "  ", i, "(%s)" % freq_dict1[i]
+        print
+        print "TALKBACK SUGGESTED:"
+        w = [x for x in freq_dict2 if freq_dict2[x]]
+        print "  %d words found" % len(w)
+        for i in w[:10]:
+            print "  ", i, "(%s)" % freq_dict2[i]
+        # print "freq_dict1", freq_dict1
+        # print "freq_dict2", freq_dict2
         # fill missing keys
         self._fillMissingKeys(freq_dict1, freq_dict2)
         # calc cosine distance (note we assume the same order of values)

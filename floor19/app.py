@@ -12,7 +12,7 @@ import flask
 app = Flask(__name__)
 cors = CORS(app, resources={r"/talkbacks/*": {"origins": "*"}})
 
-THRESHOLD = 0.1
+THRESHOLD = 0.0
 DEFAULT_RESPONSE = "חחחחח..."
 
 @app.route('/talkbacks/<article_id>', methods = ['GET'])
