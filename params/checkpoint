@@ -1,4 +1,4 @@
-model_checkpoint_path: "/Users/yael/PycharmProjects/datahack/floor19/params/model.ckpt-13"
+model_checkpoint_path: "./model.ckpt-13"
 all_model_checkpoint_paths: "/Users/yael/PycharmProjects/datahack/floor19/params/model.ckpt-9"
 all_model_checkpoint_paths: "/Users/yael/PycharmProjects/datahack/floor19/params/model.ckpt-10"
 all_model_checkpoint_paths: "/Users/yael/PycharmProjects/datahack/floor19/params/model.ckpt-11"

@@ -11,7 +11,7 @@ def run_single_run(seed, n_words=None, params=None, model="small", should_conver
             params = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(lstm.__file__)), "..", "..", "params"))
 
     if max_per_seed is None:
-        max_per_seed = int(os.environ.get("DATAHACK_MAXPERSEED", 50))
+        max_per_seed = int(os.environ.get("DATAHACK_MAXPERSEED", 5))
 
     if n_words is None:
         n_words = int(os.environ.get("DATAHACK_NUMWORDS", 60))
