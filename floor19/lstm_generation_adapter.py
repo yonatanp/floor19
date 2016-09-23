@@ -24,10 +24,11 @@ def run_single_run(seed, n_words=None, params=None, model="small", should_conver
 
     wordlist = lstm.generate.main(123.456, should_convert_to_unicode=should_convert_to_unicode)
 
-    # TODO: smartify
-    return list(set([
-        x.strip()
-        for x in " ".join(wordlist).split("\n")
-        if len(x.split()) >= 3
-    ]))[:max_per_seed]
+    sentences = [x.strip() for x in " ".join(wordlist).split("\n")]
+    # first sentence is seeded and mostly crap
+    sentences = sentences[1:]
+    # drop shorts
+    sentences = [s for s in sentences if len(s.split()) >= 3]
+    # uniquify and limit
+    return list(set(sentences))[:max_per_seed]
 

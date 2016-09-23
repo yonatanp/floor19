@@ -23,14 +23,14 @@ FLAGS = flags.FLAGS
 
 
 def generate(session, model, seed, n_words, eval_op, unknown=None):
-    words = [seed]
+    words = seed
 
     state = session.run(model.initial_state)
 
     for n in xrange(n_words):
         fetches = [model.cost, model.final_state, model.probabilities, model.logits, eval_op]
 
-        x = np.array([words[-1:]])
+        x = np.array([[words[n]]])
 
         feed_dict = {
             model.input_data: x,
@@ -44,7 +44,18 @@ def generate(session, model, seed, n_words, eval_op, unknown=None):
         cost, state, probs, logits, _ = session.run(fetches, feed_dict)
 
         s = sorted(xrange(probs.shape[1]), key=lambda _x: probs[0, _x], reverse=True)
-        words.append(s[s[0] == unknown])
+
+        # print sorted(probs[0], reverse=True)[:5]
+
+        if n >= len(words) - 1:
+            ss = s[:3]
+            while True:
+                # chosen = np.random.choice(range(probs.shape[1]), p=probs[0])
+                chosen = np.random.choice(ss, p=probs[0, ss]/sum(probs[0, ss]))
+                if chosen != unknown:
+                    break
+            words.append(chosen)
+            # words.append(s[s[0] == unknown])
         # words.append(np.argmax(probs, 1)[0])
 
     return words
@@ -75,9 +86,10 @@ def main(_, should_convert_to_unicode=False):
 
     print "--- vocab: %d items, e.g. %s" % (len(vocab), vocab.keys()[:5])
 
+    FLAGS.seed = [x for x in FLAGS.seed.split() if x in vocab]
 
-    if FLAGS.seed not in vocab:
-        raise ValueError("Seed '%s' not in vocabulary" % (FLAGS.seed,))
+    if not FLAGS.seed:
+        raise ValueError("No seed is in vocabulary")
 
     config = get_config(FLAGS.model)
     config.vocab_size = len(vocab)
@@ -103,7 +115,8 @@ def main(_, should_convert_to_unicode=False):
             print "No checkpoint found!"
             return
 
-        words = generate(session, model, vocab[FLAGS.seed], FLAGS.n_words, tf.no_op(), unknown=vocab['unknown'])
+        words = generate(session, model, [vocab[x] for x in FLAGS.seed], FLAGS.n_words, tf.no_op(),
+                         unknown=vocab['unknown'])
 
         result = [backvocab[x] for x in words]
         print ' '.join(result)
