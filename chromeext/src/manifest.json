@@ -3,7 +3,7 @@
 
   "name": "Talkbacker Chrome Extension",
   "short_name": "talkbacker",
-  "version": "1.0.1",
+  "version": "1.0.2",
 
   "description": "Chrome extension that that talks back on ynet articles - so you don't have to!",
   "author": "Council of the 19th Floor",
@@ -33,9 +33,7 @@
   },
 
   "permissions": [
-    "http://localhost:5000/",
-    "http://d3f28d1b.ngrok.io/",
-    "http://datahack.dev.meginon.com:5000/"
+    "http://talkbacker.dev.meginon.com:5000/"
   ],
 
   "web_accessible_resources": [

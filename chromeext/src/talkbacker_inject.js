@@ -20,6 +20,7 @@
             .css("top", 0)
             .css("right", 0)
             .css("padding", "15px 15px 0 0")
+            .css("cursor", "pointer")
             .hide()
             .appendTo($("body"))
         ;
@@ -27,6 +28,10 @@
         fetchTalkback(function(suggestion) {
             d.click(function() {
                 showSuggestion(suggestion);
+            })
+            d.contextmenu(function() {
+                showSuggestion(suggestion, true);
+                return false;
             })
             d.fadeIn(350);
         });
@@ -42,7 +47,7 @@
             console.log("ARTICLE!");
             // Do the big ass cross-site scripting
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", "http://datahack.dev.meginon.com:5000/talkbacks/" + article_id, true);
+            xhr.open("GET", "http://talkbacker.dev.meginon.com:5000/talkbacks/" + article_id, true);
             xhr.onreadystatechange = function() {
                 if (xhr.readyState == 4) {
                     // JSON.parse does not evaluate the attacker's scripts.
@@ -56,12 +61,19 @@
         }
     }
 
-    function showSuggestion(response) {
-        // alert("Great article!\nWe recommend talking back with:\n\n" + response.talkback + "\n\nOR...\n\n" + response.talkback_list.join("\n"));
-        // multi_talkback_line = response.talkback_list.join("\n\n");
+    function showSuggestion(response, show_all) {
+        var single_talkback_line = response.talkback
+        var multi_talkback_line = response.talkback_list.join("\n\n");
+        if (show_all == true) {
+            var text = multi_talkback_line;
+        }
+        else {
+            var text = single_talkback_line;
+        }
+
         swal({
             title: "טוקבק עסיסי - משדרג כל כתבה!",
-            text: response.talkback,
+            text: text,
             imageUrl: injected_variables.messagebox_image,
         });
     }
