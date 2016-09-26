@@ -3,6 +3,7 @@
 #!/usr/bin/env python
 
 from flask import Flask
+from flask import request
 from TalkBacker import TalkBacker
 import requests
 from lxml import html
@@ -10,7 +11,12 @@ from flask_cors import CORS, cross_origin
 import flask
 
 app = Flask(__name__)
-cors = CORS(app, resources={r"/talkbacks/*": {"origins": "*"}})
+cors = CORS(
+    app, resources={
+        r"/talkbacks/*": {"origins": "*"},
+        r"/talkbacks_fulltext": {"origins": "*"}
+    }
+)
 
 THRESHOLD = 0.0
 DEFAULT_RESPONSE = "חחחחח..."
@@ -19,16 +25,24 @@ DEFAULT_RESPONSE = "חחחחח..."
 def get_talkbacks(article_id):
     url = "http://www.ynet.co.il/articles/%s" % str(article_id)
     header_text, article_text = _getTextFromUrl(url)
-    best_talkbacks = TalkBacker(article_text, header_text).suggest()
+    res = _generate_talkbacks(header_text, article_text)
+    return flask.jsonify(res)
+
+@app.route('/talkbacks_fulltext', methods = ['POST'])
+def get_talkbacks_fulltext():
+    res = _generate_talkbacks(request.form['header'], request.form['body'])
+    return flask.jsonify(res)
+
+def _generate_talkbacks(header_text, body_text):
+    best_talkbacks = TalkBacker(body_text, header_text).suggest()
     # if best_talkback_score >= THRESHOLD:
     #     res = {'talkback': best_talkback}
     # else:
     #     res = {'talkback': DEFAULT_RESPONSE}
-    res = {
+    return {
         'talkback': best_talkbacks[0][0],
         'talkback_list': [i[0] for i in best_talkbacks],
     }
-    return flask.jsonify(res)
 
 def _getTextFromUrl(url):
     page = requests.get(url)
