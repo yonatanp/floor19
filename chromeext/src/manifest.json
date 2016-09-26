@@ -1,9 +1,9 @@
 {
   "manifest_version": 2,
 
-  "name": "Talkbacker Chrome Extension",
+  "name": "Talkbacker",
   "short_name": "talkbacker",
-  "version": "1.0.2",
+  "version": "1.0.4",
 
   "description": "Chrome extension that that talks back on ynet articles - so you don't have to!",
   "author": "Council of the 19th Floor",

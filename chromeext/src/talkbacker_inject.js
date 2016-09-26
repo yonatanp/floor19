@@ -74,7 +74,7 @@
         swal({
             title: "טוקבק עסיסי - משדרג כל כתבה!",
             text: text,
-            imageUrl: injected_variables.messagebox_image,
+            imageUrl: injected_variables.messagebox_image
         });
     }
 
