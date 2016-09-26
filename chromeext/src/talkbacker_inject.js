@@ -4,7 +4,8 @@
     var injected_variables;
     var extensionSignalEvent;
 
-    $(function () {
+    jQuery(function () {
+        var $ = jQuery;
         injected_variables = JSON.parse(document.currentScript.getAttribute("data-variables"));
         initExtensionSignalMechanism();
         sendMessageToExtension({
@@ -38,10 +39,6 @@
     });
 
     function fetchTalkback(callback) {
-        console.log("TALKBACKER DEBUG:\n" +
-            "resource hint: " + injected_variables['resource_hint'] + "\n" +
-            "url: " + document.location.href
-        );
         if (is_article()) {
             var article_id = get_article_id();
             console.log("ARTICLE!");
@@ -91,12 +88,14 @@
     // ------------------------------------------------------------------------------------------------------
 
     function initExtensionSignalMechanism() {
+        console.log("Init signaling on: " + injected_variables.event_name);
         extensionSignalEvent = document.createEvent('Event');
-        extensionSignalEvent.initEvent('__talkbacker_chrome_ext_event', true, true);
+        extensionSignalEvent.initEvent(injected_variables.event_name, true, true);
     }
 
     function sendMessageToExtension(data) {
-        var hiddenDiv = document.getElementById('__talkbacker_chrome_ext_event_proxy');
+        console.log("Signal through: " + injected_variables.event_proxy_name);
+        var hiddenDiv = document.getElementById(injected_variables.event_proxy_name);
         hiddenDiv.innerText = JSON.stringify(data);
         hiddenDiv.dispatchEvent(extensionSignalEvent);
     }

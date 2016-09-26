@@ -1,5 +1,12 @@
 function inject() {
-    addEventProxyElement('__talkbacker_chrome_ext_event_proxy', '__talkbacker_chrome_ext_event');
+    // communication mechanism: event and proxy
+    var extension_id = getExtensionId();
+    var event_name = '__talkbacker_' + extension_id + '_event';
+    var event_proxy_name = '__talkbacker_' + extension_id + '_event_proxy';
+    addEventProxyElement(event_proxy_name, event_name);
+
+    // jquery 1.4.2 - similar to ynet's version
+    addScript("https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js");
 
     addScript(local("sweetalert2.min.js"));
     addStyle(local("sweetalert2.min.css"));
@@ -7,10 +14,21 @@ function inject() {
     var main_script = addScript(local('talkbacker_inject.js'), '__talkbackerInjectScript', {
         // example for passing extension resource hints
         messagebox_image: local("images/talkbacker-128.png"),
+        event_name: event_name,
+        event_proxy_name: event_proxy_name
     });
 }
 
 // ----------------------------------------------------------------------------------------------------------
+
+function getExtensionId() {
+    if (chrome.runtime.id != undefined) {
+        return "LOCAL_DEV";
+    }
+    else {
+        return str(chrome.runtime.id);
+    }
+}
 
 function local(rel_path) {
     return chrome.extension.getURL(rel_path);
